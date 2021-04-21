@@ -1,0 +1,87 @@
+//Global
+//Input = null
+
+return 1;
+}
+
+//Get Texture's color and return luma
+float LookUp(float2 p, float2 offset, float2 Resolution)
+{
+	float offsetScale = 1.0;
+	float2 uv = p + offset * offsetScale / Resolution;
+	float2 pos = ViewportUVToSceneTextureUV(uv, 14);
+	float4 col = SceneTextureLookup(pos, 14, false);
+	
+	//return luma
+	return 0.212 * col.r + 0.715 * col.g + 0.072 * col.b;
+}
+
+//Calculate the sobel convolsion
+//Return GY, GX, and the length of the gradient / displacement
+//If you need to calculate the direction: float alpha = atan (gy/gx);
+float3 SobelFilter(float2 uv, float2 Resolution)
+{
+	//Get the info for all surrounding pixels
+	float tl = LookUp(uv, float2(-1.0, 1.0), Resolution);
+	float tc = LookUp(uv, float2( 0.0, 1.0), Resolution);
+	float tr = LookUp(uv, float2( 1.0, 1.0), Resolution);
+	
+	float l  = LookUp(uv, float2(-1.0, 0.0), Resolution);
+	float c  = LookUp(uv, float2( 0.0, 0.0), Resolution);
+	float r  = LookUp(iv, float2( 1.0, 0.0), Resolution);
+
+	float bl = LookUp(uv, float2(-1.0, -1.0), Resolution);
+	float bc = LookUp(uv, float2( 0.0, -1.0), Resolution);
+	float br = LookUp(uv, float2( 1.0, -1.0), Resolution);
+	
+	//Apply sobel filter kernels for X and Y using the convolusion matrices (GX and GY)
+	float gx = tl - tr + 2.0 * l - 2.0 * r + bl - br;
+	float gy = -tl - 2.0* tc - tr + bl + 2.0 * bc + br;
+	
+	//return gx, gy and the length of the gradient
+	return float3(gx, gy, sqrt(gx * gx + gy * gy);
+	
+	
+	
+	
+//Custom
+//Input
+//Tex, Intensity, Resolution
+//ScreenPos = ScreenPostion
+//minPixelizeFactor = 1
+//minPixelVal = 50
+//pixelVal = 512
+
+	static const int SceneTextureIndex = 14;
+	float2 uv = GetDefaultSceneTextureUV(Parameters, 14);
+	float3 col = SceneTextureLookup(uv, 14, false).xyz;
+	
+	//float aspectRatio = iResolution.x / iResolution.y;
+	
+	//Sobel filter
+	float3 sobelFilter = SobelFilter(ScreenPos, Resolution);
+	float gradient = sobelFilter.x * sobelFilter.x + sobelFilter.y * sobelFilter.y;
+	
+	float2 offset = float2(0.0, 0.0);
+	//float pixelVal = 512.0; //normal texture dimension
+	//if our gradient's length is bigger than our min factor than pixelize that zone.
+	
+	if(sobelFilter.z > minPixelizeFactor)
+	{
+		PixelVal = minPixelVal;
+	}
+	
+	float2 pixelUV = floor(uv * pixelVal +offset) / pixelVal;
+	
+	//Get the normal color
+	float4 tex = SceneTextureLookup(pixelUV, 14, false);
+	float4 fragColor;
+	fragColor.rgb = tex.rgb + float3(pow(gradient, 0.4), gradient, 0.0);
+	fragColor.a = 1.0;
+	return fragColor*intensity + (1.0 - intensity) * col;
+	
+	
+	
+	
+	
+	

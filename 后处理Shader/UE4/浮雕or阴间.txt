@@ -1,0 +1,33 @@
+//Input
+//Tex, Resolution, intensity
+//interval = 1, ScreenPos = ScreenPosition
+//这个shader，下边的宏，分别有两种效果，一个是阴间效果，一个是浮雕效果
+
+	static const int SceneTextureIndex = 14;
+	float2 uv = GetDefaultSceneTextureUV(Parameters, SceneTextureIndex);
+	//float4 color = SceneTextureLookup(uv, SceneTextureIndex, false);
+	
+	float c[9];
+	for( int i = 0; i < 3; ++i)
+	{
+		for( int j = 0; j < 3; ++j)
+		{
+			float2 xy = ScreenPos - float2(float( i - 1) / Resolution.x, float( j - 1) / Resolution.y) * interval;
+			float2 pos = ViewportUVToSceneTextureUV(xy, SceneTextureIndex);
+			//float2 pos = uv - float2(uv.x * interval * (i - 1) / Resolution.x, uv.y * interval * (j - 1) / Resolution.y);
+			c[3*i+j] = SceneTextureLookup(pos, 14, false);
+			//c[3*i + j] = texture(iChannel0, (fragCoord.xy + vec2(i-1. j-1)) / iResolution.xy).rgb;
+		}
+	}
+#if 浮雕
+	float3 Lx = c[4] + 2.0 * (c[7] - c[1]) + c[6] + c[8] - c[2] - c[0];
+	float3 Ly = c[4] + 2.0 * (c[3] - c[5]) + c[6] + c[0] - c[2] - c[8];
+#elif 阴间
+	float3 Lx = 2.0 * (c[7] - c[1]) + c[6] + c[8] - c[2] - c[0];
+	float3 Ly = 2.0 * (c[3] - c[5]) + c[6] + c[0] - c[2] - c[8];
+#endif
+	
+	float3 G = sqrt(0.5 * (Lx * Lx + Ly * Ly);
+	
+	float4 temp = float4(G, 1.0);
+	return temp * intensity + c[4] * (1.0 - intensity);

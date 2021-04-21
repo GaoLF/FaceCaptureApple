@@ -1,0 +1,20 @@
+const float PHI = 1.61803398874989484820459;
+
+float rand(in vec2 xy, in float seed)
+{
+    return fract(tan(distance(xy * PHI, xy) * seed) * xy.x);
+}
+
+
+void mainImage( out vec4 fcol, in vec2 xy)
+{
+    vec2 uv = xy / iResolution.xy;
+
+    vec3 col = texture(iChannel0, uv).rgb;
+    vec3 rcol = vec3(rand(xy, iTime + 1.0), rand(xy, iTime + 3.0), rand(xy, iTime + 5.0));
+    float br = (col.r + col.g + col.b);
+    float rbr = (rcol.r + rcol.g + rcol.b);
+    float k = br / rbr;
+
+    fcol = vec4(rcol * k, 1.0);
+}

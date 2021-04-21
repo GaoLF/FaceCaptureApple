@@ -1,0 +1,64 @@
+//Global
+
+	return 1;
+}
+// Gaussian PDF
+float normpdf(in float x, in float sigma)
+{
+	return 0.39894 * exp ( -0.5 * x * x / (sigma * sigme )) / sigma;
+}
+
+//
+float colorDodge(in float3 src, in float3 dst)
+{
+	return step(0.0, dst) * lerp(min(float3(1.0, 1.0, 1.0), dst / float3(1.0, 1.0, 1.0) - src)), float3(1.0,
+	1.0, 1.0), step(1.0, src);
+}
+
+float greyScale(in float3 col)
+{
+	return dot(col, float3(0.3, 0.59, 0.11);
+	//return dot(col, float3(0.2126, 0.7152, 0.0722)); //sRGB
+}
+
+float2 random(float2 p)
+{
+	p = frac(p * float2(314.159, 314.265)));
+	p += dot(p, p.yx + 17.17);
+	return frac(p.xx + p.yx) * p.xy);
+	
+//Custom 
+//IN: Tex, Resolution, Intensity
+
+	const float PI = 3.141592653
+	const float PI2 = PI * 2.0;
+	const int mSize = 9;
+	const int kSize = (mSize - 1)/2;
+	//const float sigma = 3.0;
+	float kernel[mSize];
+	
+	static const int SceneTextureIndex = 14;
+	float2 uv = GetDefaultSceneTextureUV(Parameters, SceneTextureIndex);
+	float3 col = SceneTextureLookup(uv, 14, false).xyz;
+	
+	float2 r = random(uv);
+	r.x *= PI2;
+	float2 cr = float2(sin(r.x),cos(r.x))*sqrt(r.x);
+	
+	float3 blurred = SceneTextureLookup(uv + cr * (float2(mSize, mSize) / Resolution.xy), 14, false).rgb;
+	
+	float3 inv = float3(1.0, 1.0, 1.0) - blurred;
+	// color dodge
+	float3 lighten = colorDodge(col, inv);
+	// grey scale
+	float3 res = float3(greyScale(lighten).xxx);
+	
+	//more contrast
+	res = float3(pow(res.x, 3.0), pow(res, 3.0), pow(res.x, 3.0));
+	//res = clamp(res * 0.7 + 0.3 * res *res * 1.2, 0.0, 1.0);
+	
+	//edge effect
+	//if(iMouse.z > 0.5) res *= 0.25 + 0.75 * pow ( 16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y), 0.15);
+	float4 temp = float4(res, 1.0);
+	return intensity * temp + (1.0 - intensity) * col;
+

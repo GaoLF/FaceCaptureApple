@@ -1,0 +1,8 @@
+	static const int SceneTextureIndex = 14;
+	float2 uv = GetDefaultSceneTextureUV(Parameters, SceneTextureIndex);
+	
+	float4 color = SceneTextureLookup(uv, SceneTextureIndex, false);
+	
+	//sRGB monitors grey scale coefficients
+	float pixelGrey = dot(color, float4(0.2126, 0.7151, 0.0722, 0.f));
+	return float4(pixelGrey, pixelGrey, pixelGrey, 1.f);

@@ -1,0 +1,55 @@
+//需要传入sigma， kSize
+//kSize是实际卷积核的大小
+
+//Input
+//Tex, Resolution
+//k = 1.5
+//sigma = 1.5
+//radius = 0.5
+//Blend
+/////////////////////////////////////////////////////////
+
+
+	return 1;
+}
+float GaussianFunc(float x, float sigma)
+{
+	//----1/pow(2*pi) = 0.3989
+	return 0.39894f*exp(-0.5 * x * x / (sigma * sigma)) / sigma;
+
+//////////////////////////////////////////////////////////////
+	static const int SceneTextureIndex = 14;
+	float2 uv = GetDefaultSceneTextureUV(Parameters, SceneTextureIndex);
+	float4 result;
+	int kSize = 5;
+	int mSize = 2 * kSize + 1;
+	float kernel[11];
+	float weight = 0.f;
+	
+	for(int i = 0; i <= kSize; i++)
+	{
+		kernel[kSize + i] = kernel[kSize - 1] = GaussianFunc(float(i), sigma);
+	}
+	
+	for(int i = 0; i < mSize; i ++)
+	{
+		weight += kernel[i];
+	}
+	
+	for(int i = -kSize; i <= kSize; i ++)
+	{
+		for(int j = -kSize; j <= kSize; j ++)
+		{
+			float2 offset = float2(float(i), float(j)) / Resolution.xy;
+			result += kernel[kSize + j] * kernel[kSize + i] * SceneTextureLookup(uv + offset, SceneTextureIndex, false);
+		}
+	}
+	
+	float2 Center = ViewportUVToSceneTextureUV(float2(0.5f, 0.5f), SceneTextureIndex);
+	float2 DValue = uv - Center;
+	float CenterWeight = saturate(length(Dvalue)/radius);
+	CenterWeight = sin(CenterWeight * 3.14159265f * 0.5f);
+	float4 color = SceneTextureLookup(uv, SceneTextureIndex, false);
+	
+	result = result * CenterWeight / (weight * weight) + (1.f - CenterWeight) * color;
+	return result * Blend + color * (1.f - Blend);

@@ -1,0 +1,53 @@
+	static const int SceneTextureIndex = 14;
+	float2 uv = GetDefaultSceneTextureUV(Parameters, SceneTextureIndex);
+	int times = Times;
+	float4 m0 = float4(0,0,0,0);
+	float4 s0 = m0;
+	float4 m1 = m0;
+	float4 s1 = m0;
+	float4 fragColor;
+	
+	float n = float((times + 1)*(times + 1));
+	
+	for(int i = -times; i <= 0; i ++)
+	{
+		for(int j = -times; j <= 0; j ++)
+		{
+			float2 TempUV = uv + float2(float(i), float(j)) / Resolution.xy;
+			float4 color = SceneTextureLookup(TempUV, SceneTextureIndex, false);
+			m0 += color;
+			s0 += color * color;
+		}
+	}
+	
+	for(int i = 0; i <= times; i ++）
+	{
+		for(int j = 0; j <= times; j++)
+		{
+			float2 TempUV = uv = float2(i,j) / Resolution.xy;
+			float4 color = SceneTextureLookup(TempUV, SceneTextureIndex, false);
+			m1 += color;
+			s1 += color * color;
+		}
+	}
+	
+	float min_sigma2 = 100.f;
+	m0 /= n;
+	s0 = abs(s0 / n - m0 * m0);
+	float sigma2 = s0.r + s0.g + s0.b;
+	if(sigma2 < min_sigma2)
+	{
+		min_sigma2 = sigma2;
+		fragColor = m0;
+	}
+	
+	m1 /= n;
+	s1 = abs(s1 / n - m1 * m1);
+	sigma2 = s1.r + s1.g + s1.b;
+	if(sigma2 < min_sigma2)
+	{
+		min_sigma2 = sigma2;
+		fragColor = m1;
+	}
+	
+	return fragColor * Intersity + (1.0 - Intensity) * SceneTextureLookup(uv, SceneTextureIndex, false);

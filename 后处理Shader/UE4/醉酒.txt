@@ -1,0 +1,19 @@
+//Input 
+//Tex, fTime, Intensity
+
+	static const int SceneTextureIndex = 14;
+	float2 uv = GetDefaultSceneTextureUV(Parameters, SceneTextureIndex);
+
+	float freq = 3.f * sin(0.5 * fTIme);
+	float2 warp = 0.5000f * sin(uv.xy * 1.0f * freq + float2(0.f, 0.f) + fTime) +
+			   	  0.2500f * sin(uv.yx * 2.3f * freq + float2(0.f, 0.f) + fTime) +
+				  0.1250f * sin(uv.xy * 4.1f * freq + float2(0.f, 0.f) + fTime) +
+				  0.0625f * sin(uv.yx * 7.9f * freq + float2(0.f, 0.f) + fTime);
+	float temp = 0.01f * Intensity;
+	
+	warp.x = warp.x * sin(uv.x * 2 * 3.141592653);
+	warp.y = warp.y * sin(uv.y * 2 * 3.141592653);
+	
+	float2 st = (uv + temp * warp);
+	float4 color = SceneTextureLookup(st, SceneTextureIndex, false);
+	return color;

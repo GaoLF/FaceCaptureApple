@@ -1,0 +1,30 @@
+	static const int SceneTextureIndex = 14;
+	float2 uv = GetDefaultSceneTextureUV(Parameters,SceneTextureIndex);
+	float4 color = SceneTextureLookup(uv, SceneTextureIndex, false);
+	float r = color.r;
+	float g = color.g;
+	float b = color.b;
+	
+	float vmax = max(r,max(g,b));
+	float vmin = min(r,min(g,b));
+	
+	float Value = vmax;
+	
+	/*
+	float Sat = 0.f;
+	if(vmax < 0.01)
+		Sat = 0.f;
+	else
+		Sat = (vmax - vmin)/vmax;
+		
+	if(Sat > 0.99)
+		return color;
+	*/
+	
+	if(r>0.95 && g < 0.05 && b < 0.05)
+		return float(1.0, 0.0, 0.0, 1.0);
+	
+	if(Value < Intensity)
+		return float4(0.f, 0.f, 0.f, 1.f);
+	else
+		return float4(1.f, 1.f, 1.f, 1.f);

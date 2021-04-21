@@ -1,0 +1,34 @@
+	static const int SceneTextureIndex = 14;
+	float2 uv = GetDefaultSceneTextureUV(Parameters, SceneTextureIndex)l
+	uint RadialBlurLoop = uint(Loop);
+	
+	float2 RatialUV = uv;
+	float w = 1.f;
+	float2 d = uv;
+	float2 vUV = ViewportUVToSceneTextureUV(float2(0.5, 0.5), SceneTextureIndex);
+	
+	float4 outputcolor = float4(0.f, 0.f, 0.f, 1.f);
+	
+	for(uint i = 0; i < RadialBlurLoop; i++)
+	{
+		half4 BiasSceneColor = SceneTextureLookup(RatialUV, SceneTextureIndex, false);
+		BiasSceneColor = smoothstep(0.0, 1.0, BiasSceneColor);
+		outputcolor += BiasSceneColor * w;
+		w = w * 0.99;
+		//RatialUV += (d - vUV) / RadialBlurLoop;
+		if(d.x > vUV.x)
+			RatialUV.x -= (d.x - vUV.x) / RadialBlurLoop;
+		else
+			RatialUV.x += (vUV.x - d.x) / RadialBlurLoop;
+		if(d.y > vUV.y)
+			RatialUV.y -= (d.y - vUV.y) / RadialBlurLoop;
+		else
+			RatialUV.y += (vUV.y - d.y) / RadialBlurLoop;
+	}
+	
+	//if(RadialBlurLoop.y > 0.999)
+		outputcolor = outputcolor * intensity / (RadialBlurLoop + 1.0);
+	outputcolor = outputcolor * alpha + SceneTextureLookup(uv, SceneTextureIndex, false) * (1 - alpha);
+	
+	return outpucolor;
+	

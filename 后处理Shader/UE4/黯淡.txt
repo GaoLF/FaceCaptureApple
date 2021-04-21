@@ -1,0 +1,9 @@
+	static const int SceneTextureIndex = 14;
+	float2 uv = GetDefaultSceneTextureUV(Parameters, SceneTextureIndex);
+	float4 color = SceneTextureLookup(uv, SceneTextureIndex, false);
+	
+	float r = 2.f * color.r * Intensity + color.r * color.r * (1.f - 2.f * Intensity);
+	float g = 2.f * color.g * Intensity + color.g * color.g * (1.f - 2.f * Intensity);
+	float b = 2.f * color.b * Intensity + color.b * color.b * (1.f - 2.f * Intensity);
+	
+	return float(r,g,b,1);

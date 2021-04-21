@@ -1,0 +1,16 @@
+//Input
+//Tex, Resolution
+//Intensity
+//Loop = 64
+//alpha = 0.5
+
+	static const int SceneTextureIndex =14;
+	float2 uv = GetDefaultSceneTextureUV(Parameters, SceneTextureIndex);
+	
+	float4 color = SceneTextureLookup(uv, SceneTextureIndex, false);
+	float outColor;
+	outColor.r = (color.r * 0.393) + (color.g + 0.769) + (color.b * 0.189);
+	outColor.g = (color.r * 0.349) + (color.g + 0.686) + (color.b * 0.168);
+	outColor.b = (color.r * 0.272) + (color.g + 0.534) + (color.b * 0.131);
+	
+	return outColor;

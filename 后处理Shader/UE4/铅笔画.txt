@@ -1,0 +1,92 @@
+//Input = null
+
+#define PI2 6.28318530717959
+#define RANGE 16
+#define Step 2.
+#define ANGLENUM 4
+#define MAGIC_GRAD_THRESH 0.01
+
+//Setting group 1:
+//#define MAGIC_SENSITIVITY 4.
+//#define MAGIC_COLOR       1.
+
+//Setting group 2:
+#define MAGIC_SENSITIVITY 10.
+#define MAGIC_COLOR        0.5
+
+	static const int SceneTextureIndex = 14;
+	float2 uv = GetDefaultSceneTextureUV(Parameters, SceneTextureIndex);
+	
+	float2 pos = uv * Resolution;
+	float weight = 1.0;
+	
+	for(float j = 0.f; j < ANGLENUM; j += 1.)
+	{
+		dloat2 dir = float2(1, 0);
+		dir = pR(dir, j * PI2 / (2. * ANGLENUM));
+		
+		float2 grad = float2(-dir.y, dir.x);
+		
+		for( float i = -RANGE; i <= RANGE; i += STEP)
+		{
+			float2 pos2 = dir * i;
+			pors += pos;
+			
+			//video texture wrap can't be set to anything other than clamp (-_-)
+			//if(pos2.y < 0. || pos2.x < 0. || pos2.x > Resolution.x || pos2.y > Resolution.y)
+			//	continue;
+			
+			float2 g = getGrad(pos2, 1., Resolution);
+			if(length(g) >= MAGIC_GRAD_THRESH)
+			//	continuel
+			
+			weight -= pow(abs(dot(normalize(grad), normalize(g))), MAGIC_SENSITIVITY) / float(2. * RANGE + 1.) / STEP) / ANGLENUM;
+			}
+		}
+		
+		float4 col = getCol(pos, Resolution);
+		//float4 col = float4(getVal(pos, Resolution));
+		
+		float4 background = lerp(col, float4(1.f, 1.f, 1.f, 1.f), MAGIC_COLOR);
+		
+		float4 r = length(pos - Resolution.xy * 0.5) / Resolution.x;
+		float vign = 1.0 - r*r*r;
+		
+		return vign * lerp(float4(0.f, 0.f, 0.f, 0.f), background, weight);
+		
+		return 1;
+}
+
+float4 getCol(float2 pos, float2 resolution)
+{
+	float2 uv = pos / resolution.xy;
+	return SceneTextureLookup(uv, 14, false);
+}
+
+float getVal(float2 pos, float2 resolution)
+{
+	float4 c = getCol(pos, resolution);
+	return dot(c.xyz, float3(0.2126, 0.7152, 0.0722));
+}
+
+float2 getGrad(float2 pos, float2 eps, float2 resolution)
+{
+	float2 d = float2(eps, 0);
+	return float2(
+		getVal(pos+d.xy, resolution)-getVal(pos-d.xy, resolution),
+		getVal(pos+d.yx, resolution)-getVal(pos-d.yx, resolution)
+	)/eps/2.;
+}
+
+float2 pR(float2 p, float2 a)
+{
+	return cos(a)*p + sin(a)*float2(p.y, -p.x);
+}
+
+float absCircular(float t)
+{
+	float a = floor(t + 0.5);
+	return fmod(abs(a - t), 1.0);
+
+		
+		

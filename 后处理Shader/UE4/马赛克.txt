@@ -1,0 +1,19 @@
+//Input
+//Tex, Resolution
+//w , h = Intensity * 300 + 200
+//alpha
+
+	static const int SceneTextureIndex = 14;
+	float2 uv = GetDefaultSceneTextureUV(Parameters, SceneTextureIndex);
+	
+	uv = floor(uv * float2(w, h) ) / float2 (w, h);
+	float4 color = SceneTextureLookup(uv, SceneTextureIndex, false);
+	
+	color.x = float(int((color.x * 8.0) + 0.5)) / 8.0;
+	color.y = float(int((color.y * 8.0) + 0.5)) / 8.0;
+	color.z = float(int((color.z * 8.0) + 0.5)) / 8.0;
+	
+	color = color * alpha + SceneTextureLookup(GetDefaultSceneTextureUV(Parameters, SceneTextureIndex),
+	SceneTextureIndex, false) * (1 - alpha);
+	
+	return color;
